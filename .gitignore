@@ -6,3 +6,11 @@ __pycache__/
 
 #Flask
 .venv/
+
+#PlatformIO
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+
+*.map
