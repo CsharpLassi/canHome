@@ -11,7 +11,7 @@
               <div class="card"> 
                 <h4 class="card-header">On</h4>
                 <div class="card-body"> 
-                  <form action="/on" method="get">
+                  <form action="/led/on" method="get">
                     <div class="form-group"> 
                       <label for="on-color">Color:</label>
                       <input type="color" {% if color %} value="{{ color }}" {% endif %} class="form-control" id="on-color" name="color" >
