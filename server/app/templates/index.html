@@ -1,0 +1,29 @@
+ <html> 
+    <head> 
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">  
+    </head> 
+    <body> 
+    <div class=page> 
+      <div class="vertical-center" style="min-height: 100%; display: flex; align-items: center;"> 
+        <div class="container"> 
+          <div class="row justify-content-sm-center">
+            <div class="col-sm-12 col-md-3"> 
+              <div class="card"> 
+                <h4 class="card-header">On</h4>
+                <div class="card-body"> 
+                  <form action="/on" method="get">
+                    <div class="form-group"> 
+                      <label for="on-color">Color:</label>
+                      <input type="color" {% if color %} value="{{ color }}" {% endif %} class="form-control" id="on-color" name="color" >
+                    </div> 
+                    <button type="submit" class="btn btn-primary">Submit</button> 
+                  </form> 
+                </div> 
+              </div>
+            </div> 
+          </div> 
+        </div> 
+      </div> 
+    </div> 
+    </body> 
+ </html>
