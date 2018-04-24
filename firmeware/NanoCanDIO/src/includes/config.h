@@ -4,6 +4,15 @@
 #include <stdint.h>
 #include <Adafruit_NeoPixel.h>
 
+//BOARD
+extern const uint8_t BOARDID;
+extern const uint8_t BOARDVERSION;
+extern const uint8_t FIRMWAREVERSION;
+
+const uint8_t BOARDID =1;
+const uint8_t BOARDVERSION = 1;
+const uint8_t FIRMWAREVERSION = 1;
+
 extern const uint8_t numberOfLeds;
 extern const uint8_t pinNum;
 
