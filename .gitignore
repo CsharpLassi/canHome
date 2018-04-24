@@ -16,6 +16,10 @@ venv/
 
 *.map
 
+
+#Atom
+*.gch
+
 #Flatter
 # See https://www.dartlang.org/tools/private-files.html
 

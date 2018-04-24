@@ -4,6 +4,7 @@
 #include<led_strip.h>
 #include <parse.h>
 
+#include "canController.h"
 
 using namespace std;
 
@@ -14,27 +15,21 @@ const uint8_t cmdSize = 128;
 char cmd[cmdSize];
 
 
-
 const uint8_t LED = 13;
 
 void setup()
 {
-
   //LED OFf
   pinMode(LED, OUTPUT);
-  digitalWrite(LED, LOW);
+  digitalWrite(LED, HIGH);
 
+  initCan();
 
   Serial.begin(2400);
   Serial.println("Hallo!");
   initLedStrip();
-  /*
 
-  rgbwColor_t onColor;
-  onColor.r = 255;
-
-  setOn(onColor);
-  */
+  digitalWrite(LED, LOW);
 }
 
 bool readCommand()
