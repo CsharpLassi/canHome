@@ -68,10 +68,12 @@ bool readCommand()
   return false;
 }
 
-bool checkCommand(const char* cmd,char* input)
+bool checkCommand(const char* cmd,char* input,uint8_t* index)
 {
   for (uint8_t i = 0; i < 128; i++)
   {
+    *index = i;
+
     char charCmd = cmd[i];
     char charInput = input[i];
 
@@ -84,7 +86,7 @@ bool checkCommand(const char* cmd,char* input)
 
   }
 
-  return true;
+  return false;
 }
 
 void loop()
@@ -93,22 +95,30 @@ void loop()
   {
     Serial.println();
 
+    const char* onCmd = "on";
+    const char* offCmd ="off";
 
-    if (checkCommand("on",cmd))
+    const char* setBackgroundColorCmd = "setBackgroundColor";
+
+    const char* startBarCmd = "startBar";
+
+    uint8_t index = 0;
+
+    if (checkCommand(onCmd,cmd,&index))
     {
       setOn();
     }
-    else if(checkCommand("off",cmd))
+    else if(checkCommand(offCmd,cmd,&index))
     {
       setOff();
     }
-    else if(checkCommand("set",cmd))
+    else if(checkCommand(startBarCmd,cmd,&index))
     {
-
-      uint8_t index = 3;
+      startBarAnimation();
+    }
+    else if(checkCommand(setBackgroundColorCmd,cmd,&index))
+    {
       hsvwColor_t onColor = parseColor(cmd,&index);
-
-      //Serial.println(String(onColor.h) + ";" + String(onColor.s) + ";" + String(onColor.v));
 
       setBackgroundColor(onColor);
 

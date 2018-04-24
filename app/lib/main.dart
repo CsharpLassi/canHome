@@ -105,6 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return HelperMethods.get("led/off", context);
   }
 
+  Future startBar() async {
+    return HelperMethods.get("led/startBar", context);
+  }
+
 
   Future changeColor() async {
     return HelperMethods.get("led/set?color=x${rgb.hr+rgb.hg+rgb.hb}", context);
@@ -148,6 +152,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 'Off',
               ),
               onPressed: turnLedOff,
+            ),
+          ),
+          new ListTile(
+            title: new MaterialButton(
+              child: const Text(
+                'Bar-Animation',
+              ),
+              onPressed: startBar,
             ),
           ),
           new ExpansionTile(

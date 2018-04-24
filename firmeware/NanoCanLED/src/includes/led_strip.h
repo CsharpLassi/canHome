@@ -8,6 +8,7 @@ struct settings
 {
   pixelColor_t backgroundColor;
   pixelColor_t foregroundColor;
+  uint16_t delay;
 };
 
 extern const uint8_t pinNum;
@@ -24,7 +25,6 @@ void setOn();
 void setOff();
 
 void startBarAnimation();
-void startBarAnimation(rgbwColor_t color);
 
 void setBackgroundColor(pixelColor_t color);
 void setForegroundColor(pixelColor_t color);

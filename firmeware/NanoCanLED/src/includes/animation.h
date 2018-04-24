@@ -28,7 +28,6 @@ class defaultAnimation : public animation
 class onAnimation : public animation
 {
   public:
-    uint16_t ledDelay = 0;
     void start(){ };
     void end(){ };
     bool drawNext(Adafruit_NeoPixel*, settings*);
@@ -39,14 +38,9 @@ class barAnimation : public animation
   private:
     uint8_t step = 0;
     bool foregroundColorIsSet = false;
-    pixelColor_t foregroundColor;
-
-    pixelColor_t getForegroundColor(settings*);
-
+    
   public:
-    uint16_t ledDelay = 0;
 
-    void setForegroundColor(pixelColor_t);
 
     void start();
     void end();

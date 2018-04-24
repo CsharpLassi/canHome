@@ -21,13 +21,21 @@ void initLedStrip()
 
 void ledStripUpdateTask(void)
 {
+static animation* oldAnimation = NULL;
+
   if(!run)
     return;
 
   if(currentAnimation == NULL)
     currentAnimation = &defaultAnimation;
 
-  currentAnimation->start();
+  if (oldAnimation != currentAnimation)
+    currentAnimation->start();
+
+  oldAnimation = currentAnimation;
+
+
+
   if(currentAnimation->drawNext(&strip, &currentSettings))
   {
     currentAnimation->end();
@@ -43,7 +51,6 @@ void setAnimation(animation* newAnimation)
 void setOn()
 {
   static onAnimation animation;
-  animation.ledDelay = 10;
 
 
   setAnimation(&animation);
@@ -65,14 +72,7 @@ void startBarAnimation()
 {
   static barAnimation animation;
 
-  setAnimation(&animation);
-}
-
-void startBarAnimation(rgbwColor_t color)
-{
-  static barAnimation animation;
-  animation.setForegroundColor(createPWMColor(color));
-
+  run = true;
   setAnimation(&animation);
 }
 

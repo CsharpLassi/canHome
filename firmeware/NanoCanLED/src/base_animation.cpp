@@ -6,5 +6,4 @@ void cleanUp(Adafruit_NeoPixel* strip,pixelColor_t color)
   {
     strip->setPixelColor(i,color.r,color.g,color.b);
   }
-  strip->show();
 }

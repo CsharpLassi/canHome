@@ -12,6 +12,7 @@ bool offAnimation::drawNext( Adafruit_NeoPixel *strip, settings* settings)
   black.w = 0;
 
   cleanUp(strip,black);
+  strip->show();
 
   return true;
 }

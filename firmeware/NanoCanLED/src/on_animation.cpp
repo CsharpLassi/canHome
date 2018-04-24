@@ -12,7 +12,7 @@ bool onAnimation::drawNext(Adafruit_NeoPixel* strip,settings* settings)
     strip->setPixelColor(i, showColor.r, showColor.g, showColor.b);
 
     strip->show();
-    delay(ledDelay);
+    delay(settings->delay);
   }
 
   return true;

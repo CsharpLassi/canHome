@@ -7,34 +7,25 @@ void barAnimation::start()
   step = 0;
 }
 
-void barAnimation::setForegroundColor(pixelColor_t useColor)
-{
-  foregroundColorIsSet = true;
-  foregroundColor = useColor;
-}
-
-pixelColor_t barAnimation::getForegroundColor(settings* settings)
-{
-  if(foregroundColorIsSet)
-    return foregroundColor;
-  return settings->foregroundColor;
-}
 
 bool barAnimation::drawNext(Adafruit_NeoPixel *strip,settings* settings)
 {
+    pixelColor_t foregroundColor =  settings->foregroundColor;
+    pixelColor_t backgroundColor =  settings->backgroundColor;
 
 
-    if (ledDelay == 0)
-      ledDelay = 100;
+    cleanUp(strip, backgroundColor);
 
+    strip->setPixelColor(step, foregroundColor.r , foregroundColor.g, foregroundColor.b);
 
-    pixelColor_t backgroundColor;
-    pixelColor_t foregroundColor;
+    strip->show();
 
-    return true;
+    step = (step+ 1)% numberOfLeds;
+
+    return false;
 }
 
 void barAnimation::end()
 {
-  foregroundColorIsSet = false;
+
 }
