@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 
-void onAnimation::drawNext(Adafruit_NeoPixel* strip,settings* settings,bool* interrupt)
+bool onAnimation::drawNext(Adafruit_NeoPixel* strip,settings* settings)
 {
   pixelColor_t showColor = settings->backgroundColor;
 
@@ -14,4 +14,6 @@ void onAnimation::drawNext(Adafruit_NeoPixel* strip,settings* settings,bool* int
     strip->show();
     delay(ledDelay);
   }
+
+  return true;
 }

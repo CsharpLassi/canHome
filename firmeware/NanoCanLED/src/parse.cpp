@@ -2,11 +2,47 @@
 
 #include <Arduino.h>
 
-hsvwColor_t parseColor(String* cmd,uint16_t* index)
-{
-  uint8_t rgb[3];
 
-  uint16_t rIndex = *index;
+hsvwColor_t parseColor(char* cmd,uint8_t* index)
+{
+  uint8_t rgbw[4];
+
+  register uint8_t i = *index;
+  register uint8_t j = 0;
+  register uint8_t k = 0;
+
+  register char c;
+
+  register uint8_t size = 3;
+  uint8_t base = 10;
+  char str[4];
+
+
+  while ((c = cmd[i++]) != 0)
+  {
+    if(c == ' ')
+      continue;
+
+    if (c == '#' || c == 'x')
+    {
+      base = 16;
+      size = 2;
+      continue;
+    }
+
+    str[k++] = c;
+    k%=size;
+    if( k == 0)
+    {
+      str[size] = '\0';
+      rgbw[j++] = strtoul(str, NULL, base);
+    }
+
+  }
+
+  *index = i;
+
+  /*
 
   if((*cmd)[ rIndex+ 1 ] == '#')
   {
@@ -29,7 +65,7 @@ hsvwColor_t parseColor(String* cmd,uint16_t* index)
     }
   }
 
+*/
 
-
-  return convertToHSV(rgb[0],rgb[1],rgb[2]);
+  return convertToHSV(rgbw[0],rgbw[1],rgbw[2]);
 }

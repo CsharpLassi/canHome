@@ -2,9 +2,8 @@
 #define __PARSE_H__
 
 #include <stdint.h>
-#include <WString.h>
 #include <led_color.h>
 
-hsvwColor_t parseColor(String*,uint16_t*);
+hsvwColor_t parseColor(char*,uint8_t*);
 
 #endif

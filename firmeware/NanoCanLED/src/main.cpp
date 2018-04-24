@@ -9,8 +9,11 @@ using namespace std;
 
 bool readCommand();
 
+const uint8_t cmdSize = 128;
 
-String* command;
+char cmd[cmdSize];
+
+
 
 const uint8_t LED = 13;
 
@@ -21,11 +24,10 @@ void setup()
   pinMode(LED, OUTPUT);
   digitalWrite(LED, LOW);
 
-  Serial.begin(9600);
+
+  Serial.begin(2400);
   Serial.println("Hallo!");
   initLedStrip();
-
-  command = new String();
   /*
 
   rgbwColor_t onColor;
@@ -37,45 +39,82 @@ void setup()
 
 bool readCommand()
 {
-  if (Serial.available() > 0)
+  static uint8_t index = 0;
+
+  while (Serial.available() > 0)
   {
       int incomingByte = Serial.read();
       if(incomingByte != -1)
       {
         char newChar = (char)incomingByte;
+
         Serial.print(newChar);
         if (newChar == ';')
+        {
+          cmd[index] = '\0';
+          index = 0;
           return true;
-        *command += newChar;
+        }
 
+        cmd[index++] = newChar;
+
+        if (index == cmdSize)
+        {
+          index = 0;
+          return false;
+        }
       }
   }
   return false;
+}
+
+bool checkCommand(const char* cmd,char* input)
+{
+  for (uint8_t i = 0; i < 128; i++)
+  {
+    char charCmd = cmd[i];
+    char charInput = input[i];
+
+    if (charCmd == '\0' )
+      return true;
+
+    if (charInput == '\0' || charCmd != charInput)
+      return false;
+
+
+  }
+
+  return true;
 }
 
 void loop()
 {
   if(readCommand())
   {
-
     Serial.println();
-    if (command->startsWith("on"))
+
+
+    if (checkCommand("on",cmd))
     {
-      uint16_t index = 2;
-      hsvwColor_t onColor = parseColor(command,&index);
-
-      Serial.println(String(onColor.h) + ";" + String(onColor.s) + ";" + String(onColor.v));
-
-      setBackgroundColor(onColor);
       setOn();
     }
-    else if(command->startsWith("off"))
+    else if(checkCommand("off",cmd))
     {
       setOff();
     }
+    else if(checkCommand("set",cmd))
+    {
 
-    command = new String();
+      uint8_t index = 3;
+      hsvwColor_t onColor = parseColor(cmd,&index);
+
+      //Serial.println(String(onColor.h) + ";" + String(onColor.s) + ";" + String(onColor.v));
+
+      setBackgroundColor(onColor);
+
+    }
   }
+
 
   ledStripUpdateTask();
 }

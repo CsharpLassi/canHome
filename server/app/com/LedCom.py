@@ -5,7 +5,7 @@ class LedCom:
     __ser = None
 
     def __init__(self):
-        self.__ser = serial.Serial("/dev/ttyUSB0", 9600)
+        self.__ser = serial.Serial("/dev/ttyUSB0", 2400)
         self.open()
 
     def open(self):
@@ -21,3 +21,4 @@ class LedCom:
 
     def write(self, data):
         self.__ser.write(data)
+        self.__ser.flushOutput()

@@ -14,7 +14,15 @@ class animation
   public:
     virtual void start();
     virtual void end();
-    virtual void drawNext(Adafruit_NeoPixel*, settings*, bool* interrupt);
+    virtual bool drawNext(Adafruit_NeoPixel*, settings*);
+};
+
+class defaultAnimation : public animation
+{
+  public:
+    void start(){ };
+    void end(){ };
+    bool drawNext(Adafruit_NeoPixel*, settings*);
 };
 
 class onAnimation : public animation
@@ -23,7 +31,7 @@ class onAnimation : public animation
     uint16_t ledDelay = 0;
     void start(){ };
     void end(){ };
-    void drawNext(Adafruit_NeoPixel*, settings*, bool* interrupt);
+    bool drawNext(Adafruit_NeoPixel*, settings*);
 };
 
 class barAnimation : public animation
@@ -42,7 +50,7 @@ class barAnimation : public animation
 
     void start();
     void end();
-    void drawNext(Adafruit_NeoPixel*, settings*, bool* interrupt);
+    bool drawNext(Adafruit_NeoPixel*, settings*);
 };
 
 class offAnimation : public animation
@@ -50,7 +58,7 @@ class offAnimation : public animation
   public:
     void start(){ };
     void end(){ };
-    void drawNext(Adafruit_NeoPixel*, settings*, bool* interrupt);
+    bool drawNext(Adafruit_NeoPixel*, settings*);
 };
 
 

@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 
-void offAnimation::drawNext( Adafruit_NeoPixel *strip, settings* settings,bool* interrupt)
+bool offAnimation::drawNext( Adafruit_NeoPixel *strip, settings* settings)
 {
   pixelColor_t black;
   black.r = 0;
@@ -12,4 +12,6 @@ void offAnimation::drawNext( Adafruit_NeoPixel *strip, settings* settings,bool* 
   black.w = 0;
 
   cleanUp(strip,black);
+
+  return true;
 }

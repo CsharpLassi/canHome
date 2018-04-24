@@ -4,10 +4,11 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-static animation* currentAnimation = NULL;
-static settings currentSettings;
-static bool interrupt = false;
+animation* currentAnimation = NULL;
+settings currentSettings;
 
+bool run = false;
+defaultAnimation defaultAnimation;
 
 void initLedStrip()
 {
@@ -20,26 +21,22 @@ void initLedStrip()
 
 void ledStripUpdateTask(void)
 {
-  if(currentAnimation == NULL)
-  {
+  if(!run)
     return;
-  }
+
+  if(currentAnimation == NULL)
+    currentAnimation = &defaultAnimation;
+
   currentAnimation->start();
-  currentAnimation->drawNext(&strip, &currentSettings, &interrupt);
-  currentAnimation->end();
-  currentAnimation = NULL;
-  interrupt = false;
+  if(currentAnimation->drawNext(&strip, &currentSettings))
+  {
+    currentAnimation->end();
+    currentAnimation = NULL;
+  }
 }
 
 void setAnimation(animation* newAnimation)
 {
-  if (currentAnimation != NULL)
-  {
-    interrupt = true;
-    while (interrupt)
-      delay(10);
-  }
-
   currentAnimation = newAnimation;
 }
 
@@ -50,6 +47,8 @@ void setOn()
 
 
   setAnimation(&animation);
+
+  run = true;
 }
 
 void setOff()
@@ -57,6 +56,9 @@ void setOff()
   static offAnimation animation;
 
   setAnimation(&animation);
+  ledStripUpdateTask();
+
+  run = false;
 }
 
 void startBarAnimation()

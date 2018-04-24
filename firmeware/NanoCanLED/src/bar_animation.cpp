@@ -20,7 +20,7 @@ pixelColor_t barAnimation::getForegroundColor(settings* settings)
   return settings->foregroundColor;
 }
 
-void barAnimation::drawNext(Adafruit_NeoPixel *strip,settings* settings,bool* interrupt)
+bool barAnimation::drawNext(Adafruit_NeoPixel *strip,settings* settings)
 {
 
 
@@ -31,21 +31,7 @@ void barAnimation::drawNext(Adafruit_NeoPixel *strip,settings* settings,bool* in
     pixelColor_t backgroundColor;
     pixelColor_t foregroundColor;
 
-    while (!(*interrupt))
-    {
-      backgroundColor = settings->backgroundColor;
-      foregroundColor = getForegroundColor(settings);
-
-      cleanUp(strip,backgroundColor);
-
-      strip->setPixelColor(step,foregroundColor.r,foregroundColor.g,foregroundColor.b);
-      step = (step +1) %numberOfLeds;
-
-
-
-      strip->show();
-      delay(ledDelay);
-    }
+    return true;
 }
 
 void barAnimation::end()
