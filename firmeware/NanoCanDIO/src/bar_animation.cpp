@@ -1,5 +1,4 @@
 #include <animation.h>
-#include <led_strip.h>
 #include <Arduino.h>
 
 void barAnimation::start()
@@ -8,19 +7,19 @@ void barAnimation::start()
 }
 
 
-bool barAnimation::drawNext(Adafruit_NeoPixel *strip,settings* settings)
+bool barAnimation::drawNext(Adafruit_NeoPixel *strip,portsettings_t* settings)
 {
     pixelColor_t foregroundColor =  settings->foregroundColor;
     pixelColor_t backgroundColor =  settings->backgroundColor;
 
 
-    cleanUp(strip, backgroundColor);
+    cleanUp(strip, backgroundColor,settings->ledNumbers);
 
     strip->setPixelColor(step, foregroundColor.r , foregroundColor.g, foregroundColor.b);
 
     strip->show();
 
-    step = (step+ 1)% numberOfLeds;
+    step = (step+ 1)% settings->ledNumbers;
 
     return false;
 }

@@ -1,13 +1,12 @@
 #include <animation.h>
-#include <led_strip.h>
 #include <Arduino.h>
 
 
-bool defaultAnimation::drawNext( Adafruit_NeoPixel *strip, settings* settings)
+bool defaultAnimation::drawNext( Adafruit_NeoPixel *strip, portsettings_t* settings)
 {
   pixelColor_t showColor = settings->backgroundColor;
 
-  cleanUp(strip,showColor);
+  cleanUp(strip,showColor,settings->ledNumbers);
   strip->show();
 
   return true;

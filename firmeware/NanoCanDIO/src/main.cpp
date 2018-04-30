@@ -1,125 +1,79 @@
 #include <Arduino.h>
 #include <config.h>
 
-#include<led_strip.h>
+#include<port_controller.h>
+
 #include <parse.h>
 
 #include "can_controller.h"
+#include "can_package.h"
 
-using namespace std;
+portController ports[PORTCOUNT];
+portsettings_t portSettings[PORTCOUNT];
 
-bool readCommand();
-
-const uint8_t cmdSize = 128;
-
-char cmd[cmdSize];
-
+uint8_t portPins[] =
+{
+  2,
+  A0,
+  A1,
+  A2,
+  A3,
+  A4,
+  A5,
+  A6,
+  A7,
+};
 
 const uint8_t LED = 13;
 
-void setup()
+void boardSetup()
 {
   //LED OFf
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
 
-  initCan();
 
-  Serial.begin(2400);
-  Serial.println("Hallo!");
-  initLedStrip();
+
+  for (size_t i = 0; i < PORTCOUNT; i++)
+    ports[i].init(portPins[i],&portSettings[i]);
 
   digitalWrite(LED, LOW);
 }
 
-bool readCommand()
+
+
+void boardLoop()
 {
-  static uint8_t index = 0;
-
-  while (Serial.available() > 0)
-  {
-      int incomingByte = Serial.read();
-      if(incomingByte != -1)
-      {
-        char newChar = (char)incomingByte;
-
-        Serial.print(newChar);
-        if (newChar == ';')
-        {
-          cmd[index] = '\0';
-          index = 0;
-          return true;
-        }
-
-        cmd[index++] = newChar;
-
-        if (index == cmdSize)
-        {
-          index = 0;
-          return false;
-        }
-      }
-  }
-  return false;
+  for (size_t i = 0; i < PORTCOUNT; i++)
+    ports[i].loop();
 }
 
-bool checkCommand(const char* cmd,char* input,uint8_t* index)
+void receiveMessage(canPackage_t* package)
 {
-  for (uint8_t i = 0; i < 128; i++)
-  {
-    *index = i;
-
-    char charCmd = cmd[i];
-    char charInput = input[i];
-
-    if (charCmd == '\0' )
-      return true;
-
-    if (charInput == '\0' || charCmd != charInput)
-      return false;
-
-
-  }
-
-  return false;
 }
 
-void loop()
+void receiveSetMessage(canSetPackage_t* package)
 {
-  if(readCommand())
+  uint8_t port = package->parameters[0];
+  if( port == 0 || port > PORTCOUNT +1)
+    return;
+
+  port-=1;
+  if(package->parameter == canParameter::setMode)
   {
-    Serial.println();
-
-    const char* onCmd = "on";
-    const char* offCmd ="off";
-
-    const char* setBackgroundColorCmd = "setBackgroundColor";
-
-    const char* startBarCmd = "startBar";
-
-    uint8_t index = 0;
-
-    if (checkCommand(onCmd,cmd,&index))
-    {
-      setOn();
-    }
-    else if(checkCommand(offCmd,cmd,&index))
-    {
-      setOff();
-    }
-    else if(checkCommand(startBarCmd,cmd,&index))
-    {
-      startBarAnimation();
-    }
-    else if(checkCommand(setBackgroundColorCmd,cmd,&index))
-    {
-      hsvwColor_t onColor = parseColor(cmd,&index);
-
-      setBackgroundColor(onColor);
-
-    }
+    uint8_t type = package->parameters[1];
+    portSettings[port].type = (porttypes_t)type;
+    portSettings[port].ledNumbers = package->parameters[2];
+    ports[port].reset();
   }
+  else if (package->parameter == canParameter::backgroundColor || package->parameter == canParameter::color )
+  {
+    uint8_t r,g,b;
+    r = package->parameters[1];
+    g = package->parameters[2];
+    b = package->parameters[3];
 
-
-  ledStripUpdateTask();
+    Serial.println("Set new Color");
+    portSettings[port].backgroundColor = createPWMColor({.r = r,.g = g, .b = b});
+  }
 }

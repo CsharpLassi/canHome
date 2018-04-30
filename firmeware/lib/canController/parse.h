@@ -2,8 +2,8 @@
 #define __PARSE_H__
 
 #include <stdint.h>
-#include <led_color.h>
+#include "can_package.h"
 
-hsvwColor_t parseColor(char*,uint8_t*);
+canPackage_t parsePackage(char*,uint8_t*);
 
 #endif

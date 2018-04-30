@@ -7,7 +7,7 @@
 
 using namespace std;
 
-struct rgbwColor_t
+struct __attribute__ ((packed)) rgbwColor_t
 {
   uint8_t r;
   uint8_t g;
@@ -16,7 +16,7 @@ struct rgbwColor_t
   uint8_t w;
 };
 
-struct hsvwColor_t
+struct __attribute__ ((packed)) hsvwColor_t
 {
   float h;
   float s;
@@ -25,7 +25,7 @@ struct hsvwColor_t
   uint8_t w;
 };
 
-struct pixelColor_t
+struct __attribute__ ((packed)) pixelColor_t
 {
   uint8_t r;
   uint8_t g;
