@@ -29,6 +29,7 @@ void setup()
 {
   Serial.begin(2400);
   Serial.println("Hallo!");
+  Serial.println("[set/get] deviceId parameter [d0/Port] d1 d2 ...;");
   initCan();
 
   boardSetup();
@@ -100,12 +101,11 @@ void loop()
 
     for (register uint8_t i = 0; i < cmdSize; i++)
     {
-
       canStringCommand command = commands[i];
       if (checkCommand(command.command,cmdString,&index))
       {
         package = parsePackage(cmdString,&index);
-        package.cmd = command.commandId;
+        package.cmd = (uint16_t)command.commandId;
         cmdFounded = true;
         break;
       }
@@ -114,30 +114,14 @@ void loop()
 
     if (cmdFounded)
     {
-      if (package.deviceId == 0)
-        executeCommand(&package);
+      executeCommand(&package);
+      
+      if (package.deviceId != 0)
+        sendCanMessage(&package);
     }
   }
+
+  loopCan();
+
   boardLoop();
-}
-
-void executeCommand(canPackage_t* package)
-{
-  //set
-  if (package->cmd == canCommand::set)
-  {
-    canSetPackage_u setPackageUnion;
-    setPackageUnion.package = *package;
-
-    if(setPackageUnion.setPackage.parameter == canParameter::deviceId)
-    {
-
-    }
-    else
-    {
-      receiveSetMessage(&setPackageUnion.setPackage);
-    }
-
-  }
-  receiveMessage(package);
 }

@@ -2,6 +2,7 @@
 #define __CAN_CONTROLLER_H__
 
 #include <stdint.h>
+#include "can_package.h"
 
 const uint8_t CANVERSION = 1;
 
@@ -10,5 +11,9 @@ extern const uint8_t BOARDVERSION;
 extern const uint8_t FIRMWAREVERSION;
 
 void initCan();
+void loopCan();
+void sendCanMessage(canPackage_t*);
+
+void executeCommand(canPackage_t*);
 
 #endif

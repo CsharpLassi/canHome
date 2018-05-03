@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 const uint8_t MAXSIZE = 10;
-const uint8_t DATASIZE = 8;
+const uint8_t DATASIZE = 10;
 
 canPackage_t parsePackage(char* cmd,uint8_t* index)
 {
@@ -73,10 +73,12 @@ canPackage_t parsePackage(char* cmd,uint8_t* index)
   packageData.deviceId = datas[j++];
   //packageData.cmd = (canCommand)datas[j++];
 
-  for (k = 0; k < 7; k++)
+  for (k = 0; k < 8; k++)
   {
     packageData.parameters[k] =(uint8_t)datas[j++];
   }
+
+  packageData.length = 8;
 
   return packageData;
 }
