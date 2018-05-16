@@ -10,16 +10,6 @@ extern const uint8_t BOARDID;
 extern const uint8_t BOARDVERSION;
 extern const uint8_t FIRMWAREVERSION;
 
-void initCan();
-void setupController();
-void loopCan();
-
-void updateEEPROM();
-
-void sendCanMessage(canPackage_t*);
-
-void executeCommand(canPackage_t*);
-
 struct __attribute__ ((packed)) canSettings_t
 {
   uint8_t canVersion;
@@ -29,6 +19,23 @@ struct __attribute__ ((packed)) canSettings_t
   uint16_t deviceId;
 };
 
-canSettings_t getSettings();
+class CanController
+{
+  private:
+    static void sendInfoFrame(canCommand);
+  public:
+    static void initCan();
+    static void setupController();
+    static void loopCan();
 
+    static void updateEEPROM();
+
+    static void sendAndExecuteCommand(canCommand);
+    static void sendAndExecuteCommand(canPackage_t*);
+
+    static void executeCommand(canPackage_t*);
+    static void sendCommand(canPackage_t*);
+
+    static canSettings_t getSettings();
+};
 #endif

@@ -25,17 +25,19 @@ canStringCommand commands[] =
   {.command = "get", .commandId = canCommand::get},
   {.command = "save", .commandId = canCommand::saveSettings},
   {.command = "monitor", .commandId = canCommand::monitor},
+  {.command = "on", .commandId = canCommand::on},
+  {.command = "off", .commandId = canCommand::off},
 };
 
 bool monitor = true;
 
 void setup()
 {
-  setupController();
+  CanController::setupController();
 
-  canSettings_t currentSettings = getSettings();
+  canSettings_t currentSettings = CanController::getSettings();
 
-  initCan();
+  CanController::initCan();
 
 
   boardSetup();
@@ -58,7 +60,9 @@ void setup()
   Serial.print("Id ");
   Serial.println(currentSettings.deviceId);
 
-  Serial.println("[set/get/save/monitor] deviceId parameter [d0/Port] d1 d2 ...;");
+  Serial.println("#[on/off] deviceId [port];");
+  Serial.println("#monitor;");
+  Serial.println("#[set/get] deviceId parameter [d0/Port] d1 d2 ...;");
 }
 
 
@@ -141,14 +145,14 @@ void loop()
 
     if (cmdFounded)
     {
-      executeCommand(&package);
+      CanController::executeCommand(&package);
 
       if (package.deviceId != 0)
-        sendCanMessage(&package);
+        CanController::sendCommand(&package);
     }
   }
 
-  loopCan();
+  CanController::loopCan();
 
   boardLoop();
 }

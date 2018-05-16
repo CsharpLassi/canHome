@@ -45,12 +45,25 @@ void boardLoop()
 
 void receiveMessage(canPackage_t* package)
 {
+  uint8_t port = package->parameters[0];
+  if( port == 0 || port > PORTCOUNT)
+    return;
+
+  port-=1;
+  if(package->cmd == (uint16_t) canCommand::on)
+  {
+    ports[port].onOffState = true;
+  }
+  else if (package->cmd == (uint16_t) canCommand::off)
+  {
+    ports[port].onOffState = false;
+  }
 }
 
 void receiveSetMessage(canSetPackage_t* package)
 {
   uint8_t port = package->parameters[0];
-  if( port == 0 || port > PORTCOUNT +1)
+  if( port == 0 || port > PORTCOUNT)
     return;
 
   port-=1;

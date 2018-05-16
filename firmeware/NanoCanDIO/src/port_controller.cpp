@@ -1,4 +1,5 @@
 #include <port_controller.h>
+#include "can_controller.h"
 
 #include <Arduino.h>
 
@@ -17,29 +18,34 @@ void portController::init(uint8_t port,portsettings_t* setting)
 
 void portController::reset()
 {
+  oldInput = false;
+  onOffState = _portSetting->defaultOnOffState;
+
+
   switch (_portSetting->type)
   {
     case porttypes_t::Off:
       setOff();
-      break;
+      return;
     case porttypes_t::input:
       setInput(false);
-      break;
+      return;
     case porttypes_t::input_pullup:
       setInput(true);
-      break;
+      return;
     case porttypes_t::adc_8:
       setAdc();
-      break;
+      return;
     case porttypes_t::adc_10:
       setAdc();
-      break;
+      return;
     case porttypes_t::output:
       setOutput();
-      break;
+      return;
     case porttypes_t::led_strip:
       setLed();
-      break;
+      return;
+
   }
 
   setOff();
@@ -85,62 +91,85 @@ void portController::loop()
   if (_portSetting->type == porttypes_t::Off )
     return;
 
-    switch (_portSetting->type)
-    {
-      case porttypes_t::input:
-        loopInput();
-        break;
-      case porttypes_t::input_pullup:
-        loopInput();
-        break;
-      case porttypes_t::adc_8:
-        loopAdc();
-        break;
-      case porttypes_t::adc_10:
-        loopAdc();
-        break;
-      case porttypes_t::output:
-        loopOutput();
-        break;
-      case porttypes_t::led_strip:
-        loopLed();
-        break;
-      default:
-        return;
-    }
+  switch (_portSetting->type)
+  {
+    case porttypes_t::input:
+      loopInput();
+      break;
+    case porttypes_t::input_pullup:
+      loopInput();
+      break;
+    case porttypes_t::adc_8:
+      loopAdc();
+      break;
+    case porttypes_t::adc_10:
+      loopAdc();
+      break;
+    case porttypes_t::output:
+      loopOutput();
+      break;
+    case porttypes_t::led_strip:
+      loopLed();
+      break;
+    default:
+      return;
+  }
 
 }
 
 void portController::loopInput()
 {
-  //_portSetting->onOffState = digitalRead(_pin);
+  if(!onOffState)
+    return;
+
+  bool input = digitalRead(_pin);
+
+  if(oldInput != input)
+  {
+    if (input)
+      CanController::sendAndExecuteCommand(canCommand::TriggerOn);
+    else
+      CanController::sendAndExecuteCommand(canCommand::TriggerOff);
+  }
+
+  oldInput = input;
 }
 
 void portController::loopAdc()
 {
-  //_portSetting->adcValue = analogRead(_pin);
+  if(!onOffState)
+    return;
 }
 
 void portController::loopOutput()
 {
-  digitalWrite(_pin, _portSetting->onOffState);
+  if(!onOffState)
+    return;
 }
 
 void portController::loopLed()
 {
+  if(!onOffState && _currentAnimation == nullptr)
+    return;
+
   if(_currentAnimation == nullptr)
+  {
+    CanController::sendAndExecuteCommand(canCommand::TriggerOn);
     _currentAnimation = &_defaultAnimation;
+  }
 
   if (_oldAnimation != _currentAnimation)
     _currentAnimation->start();
 
   _oldAnimation = _currentAnimation;
 
-
+  if(!onOffState)
+    _currentAnimation = &_offAnimation;
 
   if(_currentAnimation->drawNext(&_strip,_portSetting))
   {
     _currentAnimation->end();
     _currentAnimation = nullptr;
+    CanController::sendAndExecuteCommand(canCommand::TriggerOff);
   }
 }

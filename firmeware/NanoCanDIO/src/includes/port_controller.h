@@ -15,7 +15,11 @@ class portController
     Adafruit_NeoPixel _strip;
     animation* _currentAnimation = nullptr;
     animation* _oldAnimation = nullptr;
+
     defaultAnimation _defaultAnimation;
+    offAnimation _offAnimation;
+
+    bool oldInput;
 
     void setOff();
     void setInput(bool pullup);
@@ -29,6 +33,8 @@ class portController
     void loopLed();
 
   public:
+    bool onOffState;
+
     void init(uint8_t port,portsettings_t*);
     void reset();
     void loop();

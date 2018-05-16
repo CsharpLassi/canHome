@@ -71,6 +71,7 @@ canPackage_t parsePackage(char* cmd,uint8_t* index)
 
   j = 0;
   packageData.deviceId = datas[j++];
+  packageData.extendpackageFlags = 0;
   //packageData.cmd = (canCommand)datas[j++];
 
   for (k = 0; k < 8; k++)

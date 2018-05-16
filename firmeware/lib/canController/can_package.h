@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 
+const uint8_t EXTEND_PACKAGE_FLAG_OWN_ID = 0x01;
+
 enum class canCommand: uint16_t
 {
   None = 0,
@@ -15,6 +17,11 @@ enum class canCommand: uint16_t
 
   set = 16,
   get = 17,
+  on = 18,
+  off = 19,
+
+  TriggerOn = 32,
+  TriggerOff = 33,
 };
 
 struct canStringCommand
@@ -36,6 +43,7 @@ enum class canParameter : uint8_t
 
 struct __attribute__ ((packed)) canPackage_t
 {
+  uint8_t extendpackageFlags;
   uint16_t deviceId;
   uint16_t cmd;
   uint8_t length;

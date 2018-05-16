@@ -25,5 +25,5 @@ bool defaultAnimation::drawNext( Adafruit_NeoPixel *strip, portsettings_t* setti
     cleanUp(strip,showColor,settings->ledNumbers);
     strip->show();
   }
-  return true;
+  return false;
 }

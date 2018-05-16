@@ -15,19 +15,20 @@ struct can_frame sendMsg;
 
 canSettings_t currentSettings;
 
-void sendInfoFrame(canCommand);
 
-void initCan()
+
+void CanController::initCan()
 {
+  //monitorMode = true;
   mcp2515.reset();
   mcp2515.setBitrate(CAN_125KBPS,MCP_16MHZ);
-  mcp2515.setLoopbackMode();
-  //mcp2515.setNormalMode();
+  //mcp2515.setLoopbackMode();
+  mcp2515.setNormalMode();
 
   sendInfoFrame(canCommand::boot);
 }
 
-void setupController()
+void CanController::setupController()
 {
   currentSettings = dataRead<canSettings_t>(0);
   if (currentSettings.canVersion == 0 || currentSettings.canVersion == 255)
@@ -42,18 +43,19 @@ void setupController()
   }
 }
 
-canSettings_t getSettings()
+canSettings_t CanController::getSettings()
 {
   return currentSettings;
 }
 
-void sendInfoFrame(canCommand cmd)
+void CanController::sendInfoFrame(canCommand cmd)
 {
   if (currentSettings.deviceId == 0)
     return;
 
   canPackage_t infoPackage;
   infoPackage.cmd = (uint16_t)cmd;
+  infoPackage.extendpackageFlags = EXTEND_PACKAGE_FLAG_OWN_ID;
   infoPackage.deviceId = currentSettings.deviceId;
   infoPackage.length = 6;
 
@@ -66,10 +68,10 @@ void sendInfoFrame(canCommand cmd)
   infoPackage.parameters[4] = BOARDVERSION;
   infoPackage.parameters[5] = FIRMWAREVERSION;
 
-  sendCanMessage(&infoPackage);
+  CanController::sendAndExecuteCommand(&infoPackage);
 }
 
-void loopCan()
+void CanController::loopCan()
 {
   uint8_t state =  mcp2515.readMessage(&receiveMsg);
   if (state == MCP2515::ERROR_OK)
@@ -83,6 +85,7 @@ void loopCan()
     {
       receivePackage.cmd = (uint16_t) ((receiveMsg.can_id >> 18) & 0x7FF);
       receivePackage.deviceId = (uint16_t)(receiveMsg.can_id & 0xFFFF);
+      receivePackage.extendpackageFlags = (uint8_t)((receiveMsg.can_id >> 16)& 0x3);
     }
     else
     {
@@ -95,25 +98,8 @@ void loopCan()
     for (size_t i = 0; i < 8; i++)
       receivePackage.parameters[i] = receiveMsg.data[i];
 
-    if(monitorMode)
-    {
-      Serial.print("(");
-      Serial.print(receivePackage.cmd, HEX);
-      Serial.print(" ");
-      Serial.print(receivePackage.deviceId, HEX);
-      Serial.print(" ");
-      Serial.print(receivePackage.length, HEX);
-      Serial.print(" ");
+    executeCommand(&receivePackage);
 
-      for (size_t i = 0; i<receivePackage.length; i++)
-      {  // print the data
-
-        Serial.print(receivePackage.parameters[i],HEX);
-        Serial.print(" ");
-      }
-      Serial.print(")");
-      Serial.println();
-    }
   }
   else if(state != MCP2515::ERROR_NOMSG)
   {
@@ -128,11 +114,9 @@ void loopCan()
     oldTime = currentTime;
     sendInfoFrame(canCommand::heartBeat);
   }
-
-
 }
 
-void sendCanMessage(canPackage_t* package)
+void CanController::sendCommand(canPackage_t* package)
 {
   uint32_t id = 0;
   uint16_t cmdId = (uint16_t) (package->cmd & 0x07FF);
@@ -143,7 +127,7 @@ void sendCanMessage(canPackage_t* package)
   else
   {
     id = ((uint32_t)cmdId) << 18;
-    id |= package->deviceId;
+    id |= package->deviceId | ( ((uint32_t)package->extendpackageFlags) << 16) ;
 
     id |= CAN_EFF_FLAG;
   }
@@ -158,9 +142,34 @@ void sendCanMessage(canPackage_t* package)
   mcp2515.sendMessage(&sendMsg);
 }
 
-void executeCommand(canPackage_t* package)
+void CanController::executeCommand(canPackage_t* package)
 {
-  if (package->deviceId != 0 && package->deviceId != currentSettings.deviceId)
+
+  if(monitorMode)
+  {
+    Serial.print("(");
+    Serial.print(package->cmd, HEX);
+    Serial.print(" ");
+    Serial.print(package->deviceId, HEX);
+    Serial.print(" ");
+    Serial.print(package->extendpackageFlags, HEX);
+    Serial.print(" ");
+    Serial.print(package->length, HEX);
+    Serial.print(" ");
+
+    for (size_t i = 0; i< package->length; i++)
+    {  // print the data
+
+      Serial.print(package->parameters[i],HEX);
+      Serial.print(" ");
+    }
+    Serial.print(")");
+    Serial.println();
+  }
+
+  if (package->deviceId != 0
+    && package->deviceId != currentSettings.deviceId
+    && (package->extendpackageFlags & EXTEND_PACKAGE_FLAG_OWN_ID) == 0)
     return;
 
   //set
@@ -192,14 +201,32 @@ void executeCommand(canPackage_t* package)
   {
     monitorMode = !monitorMode;
   }
+
   receiveMessage(package);
 }
 
-void updateEEPROM()
+void CanController::updateEEPROM()
 {
   currentSettings.canVersion = CANVERSION;
   currentSettings.boardId = BOARDID;
   currentSettings.boardVersion = BOARDVERSION;
   currentSettings.firmewareVersion = FIRMWAREVERSION;
   dataWrite(0, &currentSettings);
+}
+
+void CanController::sendAndExecuteCommand(canCommand cmd)
+{
+  canPackage_t package;
+  package.cmd = (uint16_t)cmd;
+  package.extendpackageFlags = EXTEND_PACKAGE_FLAG_OWN_ID;
+  package.deviceId = currentSettings.deviceId;
+  package.length = 0;
+
+  sendAndExecuteCommand(&package);
+}
+
+void CanController::sendAndExecuteCommand(canPackage_t* package)
+{
+  CanController::sendCommand(package);
+  CanController::executeCommand(package);
 }
