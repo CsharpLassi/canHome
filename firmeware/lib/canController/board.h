@@ -5,6 +5,7 @@
 
 void boardLoop();
 void boardSetup();
+void boardUpdateEEPROM();
 void receiveSetMessage(canSetPackage_t*);
 void receiveMessage(canPackage_t*);
 

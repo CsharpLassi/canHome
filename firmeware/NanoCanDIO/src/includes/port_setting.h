@@ -21,10 +21,9 @@ enum class porttypes_t : uint8_t
 struct __attribute__ ((packed)) portsettings_t
 {
   porttypes_t type;
-  bool onOffState = false;
-  uint16_t adcValue;
+  bool onOffState;
 
-  uint16_t ledNumbers = 0;
+  uint16_t ledNumbers;
 
   pixelColor_t backgroundColor;
   pixelColor_t foregroundColor;

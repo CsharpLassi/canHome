@@ -17,23 +17,50 @@ void executeCommand(canPackage_t*);
 const uint8_t cmdStringSize = 128;
 char cmdString[cmdStringSize];
 
+
+
 canStringCommand commands[] =
 {
   {.command = "set", .commandId = canCommand::set},
   {.command = "get", .commandId = canCommand::get},
+  {.command = "save", .commandId = canCommand::saveSettings},
+  {.command = "monitor", .commandId = canCommand::monitor},
 };
 
 bool monitor = true;
 
 void setup()
 {
-  Serial.begin(2400);
-  Serial.println("Hallo!");
-  Serial.println("[set/get] deviceId parameter [d0/Port] d1 d2 ...;");
+  setupController();
+
+  canSettings_t currentSettings = getSettings();
+
   initCan();
 
+
   boardSetup();
+
+
+  Serial.begin(2400);
+
+  Serial.print("CanClient V");
+  Serial.println(currentSettings.canVersion);
+
+  Serial.print("Board ");
+  Serial.print(currentSettings.boardId);
+
+  Serial.print(" V");
+  Serial.println(currentSettings.boardVersion);
+
+  Serial.print("Firmeware V");
+  Serial.println(currentSettings.firmewareVersion);
+
+  Serial.print("Id ");
+  Serial.println(currentSettings.deviceId);
+
+  Serial.println("[set/get/save/monitor] deviceId parameter [d0/Port] d1 d2 ...;");
 }
+
 
 bool readCommand()
 {
@@ -115,7 +142,7 @@ void loop()
     if (cmdFounded)
     {
       executeCommand(&package);
-      
+
       if (package.deviceId != 0)
         sendCanMessage(&package);
     }

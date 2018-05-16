@@ -7,6 +7,7 @@
 
 #include "can_controller.h"
 #include "can_package.h"
+#include "can_eeprom.h"
 
 portController ports[PORTCOUNT];
 portsettings_t portSettings[PORTCOUNT];
@@ -15,21 +16,26 @@ uint8_t portPins[] = {A0, A1, A2, A3, A4, A5, A6, A7};
 
 const uint8_t LED = 13;
 
+void boardUpdateEEPROM()
+{
+  for (uint8_t i = 0; i < PORTCOUNT; i++)
+    dataWrite<portsettings_t>(i+1,&portSettings[i]);
+}
+
 void boardSetup()
 {
   //LED OFf
   pinMode(LED, OUTPUT);
   digitalWrite(LED, HIGH);
 
-
+  for (uint8_t i = 0; i < PORTCOUNT; i++)
+    portSettings[i] = dataRead<portsettings_t>(i+1);
 
   for (size_t i = 0; i < PORTCOUNT; i++)
     ports[i].init(portPins[i],&portSettings[i]);
 
   digitalWrite(LED, LOW);
 }
-
-
 
 void boardLoop()
 {

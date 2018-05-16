@@ -11,6 +11,7 @@ enum class canCommand: uint16_t
   boot = 1,
   heartBeat = 2,
   saveSettings = 3,
+  monitor = 4,
 
   set = 16,
   get = 17,

@@ -113,12 +113,12 @@ void portController::loop()
 
 void portController::loopInput()
 {
-  _portSetting->onOffState = digitalRead(_pin);
+  //_portSetting->onOffState = digitalRead(_pin);
 }
 
 void portController::loopAdc()
 {
-  _portSetting->adcValue = analogRead(_pin);
+  //_portSetting->adcValue = analogRead(_pin);
 }
 
 void portController::loopOutput()

@@ -19,6 +19,8 @@ class animation
 
 class defaultAnimation : public animation
 {
+  private:
+    pixelColor_t oldColor;
   public:
     void start(){ };
     void end(){ };

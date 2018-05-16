@@ -1,4 +1,5 @@
 #include "can_controller.h"
+#include "can_eeprom.h"
 #include "board.h"
 
 #include <EEPROM.h>
@@ -6,11 +7,13 @@
 #include <SPI.h>
 #include <mcp2515.h>
 
+bool monitorMode;
+
 MCP2515 mcp2515(10);
 struct can_frame receiveMsg;
 struct can_frame sendMsg;
 
-uint16_t deviceId = 0;
+canSettings_t currentSettings;
 
 void sendInfoFrame(canCommand);
 
@@ -24,15 +27,37 @@ void initCan()
   sendInfoFrame(canCommand::boot);
 }
 
+void setupController()
+{
+  currentSettings = dataRead<canSettings_t>(0);
+  if (currentSettings.canVersion == 0 || currentSettings.canVersion == 255)
+  {
+    updateEEPROM();
+    boardUpdateEEPROM();
+  }
+  else if(currentSettings.firmewareVersion != FIRMWAREVERSION)
+  {
+    updateEEPROM();
+    boardUpdateEEPROM();
+  }
+}
+
+canSettings_t getSettings()
+{
+  return currentSettings;
+}
+
 void sendInfoFrame(canCommand cmd)
 {
-  if (deviceId == 0)
+  if (currentSettings.deviceId == 0)
     return;
 
   canPackage_t infoPackage;
   infoPackage.cmd = (uint16_t)cmd;
-  infoPackage.deviceId = deviceId;
+  infoPackage.deviceId = currentSettings.deviceId;
   infoPackage.length = 6;
+
+  uint16_t deviceId = currentSettings.deviceId;
 
   infoPackage.parameters[0] = deviceId >> 8;
   infoPackage.parameters[1] = deviceId & 0xFF;
@@ -70,22 +95,25 @@ void loopCan()
     for (size_t i = 0; i < 8; i++)
       receivePackage.parameters[i] = receiveMsg.data[i];
 
-    Serial.print("(");
-    Serial.print(receivePackage.cmd, HEX);
-    Serial.print(" ");
-    Serial.print(receivePackage.deviceId, HEX);
-    Serial.print(" ");
-    Serial.print(receivePackage.length, HEX);
-    Serial.print(" ");
-
-    for (size_t i = 0; i<receivePackage.length; i++)
-    {  // print the data
-
-      Serial.print(receivePackage.parameters[i],HEX);
+    if(monitorMode)
+    {
+      Serial.print("(");
+      Serial.print(receivePackage.cmd, HEX);
       Serial.print(" ");
+      Serial.print(receivePackage.deviceId, HEX);
+      Serial.print(" ");
+      Serial.print(receivePackage.length, HEX);
+      Serial.print(" ");
+
+      for (size_t i = 0; i<receivePackage.length; i++)
+      {  // print the data
+
+        Serial.print(receivePackage.parameters[i],HEX);
+        Serial.print(" ");
+      }
+      Serial.print(")");
+      Serial.println();
     }
-    Serial.print(")");
-    Serial.println();
   }
   else if(state != MCP2515::ERROR_NOMSG)
   {
@@ -132,7 +160,7 @@ void sendCanMessage(canPackage_t* package)
 
 void executeCommand(canPackage_t* package)
 {
-  if (package->deviceId != 0 && package->deviceId != deviceId)
+  if (package->deviceId != 0 && package->deviceId != currentSettings.deviceId)
     return;
 
   //set
@@ -144,8 +172,10 @@ void executeCommand(canPackage_t* package)
 
     if(setPackage.parameter == canParameter::deviceId)
     {
-      deviceId = (setPackage.parameters[0] << 8);
+      uint16_t deviceId = (setPackage.parameters[0] << 8);
       deviceId += setPackage.parameters[1];
+
+      currentSettings.deviceId = deviceId;
 
       Serial.print("New DeviceId: ");
       Serial.println(deviceId,HEX);
@@ -155,7 +185,21 @@ void executeCommand(canPackage_t* package)
   }
   else if(package->cmd == (uint16_t)canCommand::saveSettings)
   {
-
+    updateEEPROM();
+    boardUpdateEEPROM();
+  }
+  else if(package->cmd == (uint16_t)canCommand::monitor)
+  {
+    monitorMode = !monitorMode;
   }
   receiveMessage(package);
+}
+
+void updateEEPROM()
+{
+  currentSettings.canVersion = CANVERSION;
+  currentSettings.boardId = BOARDID;
+  currentSettings.boardVersion = BOARDVERSION;
+  currentSettings.firmewareVersion = FIRMWAREVERSION;
+  dataWrite(0, &currentSettings);
 }
