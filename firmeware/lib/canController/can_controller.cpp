@@ -22,8 +22,8 @@ void CanController::initCan()
   //monitorMode = true;
   mcp2515.reset();
   mcp2515.setBitrate(CAN_125KBPS,MCP_16MHZ);
-  //mcp2515.setLoopbackMode();
-  mcp2515.setNormalMode();
+  mcp2515.setLoopbackMode();
+  //mcp2515.setNormalMode();
 
   sendInfoFrame(canCommand::boot);
 }

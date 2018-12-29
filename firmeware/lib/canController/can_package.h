@@ -52,6 +52,7 @@ struct __attribute__ ((packed)) canPackage_t
 
 struct __attribute__ ((packed)) canSetPackage_t
 {
+  uint8_t extendpackageFlags;
   uint16_t deviceId;
   uint16_t cmd;
   uint8_t length;
